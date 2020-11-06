@@ -1,0 +1,27 @@
+{
+  "name": "12-employee-tracker",
+  "version": "1.0.0",
+  "description": "employee-tracker",
+  "main": "employee-tracker.js",
+  "scripts": {
+    "start": "node employee-tracker",
+    "watch": "nodemon employee-tracker",
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sareronald/12-employee-tracker.git"
+  },
+  "author": "Sarah Ronald",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sareronald/12-employee-tracker/issues"
+  },
+  "homepage": "https://github.com/sareronald/12-employee-tracker#readme",
+  "dependencies": {
+    "asciiart-logo": "^0.2.6",
+    "console.table": "^0.10.0",
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1"
+  }
+}
