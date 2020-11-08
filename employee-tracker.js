@@ -3,6 +3,7 @@ const config = require("./package.json");
 const inquirer = require("inquirer");
 const cTable = require("console.table");
 const mysql = require("mysql");
+const colors = require("colors");
 
 // create the connection information for the sql database
 const mysqlConnection = mysql.createConnection({
@@ -36,6 +37,7 @@ function start() {
           "View All Employees by Department",
           "View All Employees by Manager",
           "Add Employee",
+          "Add Department",
           "Remove Employee",
           "Update Employee Role",
           "Update Employee Manager",
@@ -61,6 +63,10 @@ function start() {
           addEmployee();
           break;
 
+        case "Add Department":
+          addDepartment();
+          break;
+
         case "Remove Employee":
           removeEmployee();
           break;
@@ -81,7 +87,6 @@ function start() {
 }
 
 // View All Employees
-// why doesn't SELECT * from employee_info work?
 function viewAllEmployees() {
   mysqlConnection.query("SELECT * FROM employee_info", (err, res) => {
     if (err) throw err;
@@ -90,9 +95,9 @@ function viewAllEmployees() {
   });
 }
 
-// // View All Employees by Department
+// View All Employees by Department
 function viewAllEmployeesByDept() {
-  console.log("Selecting all Employees by Department...\n");
+  console.log(`\nSelecting all Employees by Department...\n`);
   mysqlConnection.query(
     "SELECT department.name FROM department",
     (err, response) => {
@@ -118,7 +123,9 @@ function viewAllEmployeesByDept() {
             [answer.deptChoice],
             (err, res) => {
               if (err) throw err;
-              console.log(`The employees in the ${answer.deptChoice} are: \n`);
+              console.log(
+                `\n The employees in the ${answer.deptChoice} Department are: \n`
+              );
               console.table(res);
             }
           );
@@ -128,53 +135,167 @@ function viewAllEmployeesByDept() {
   );
 }
 
+// -- View All Employees by Manager OPTIONAL
+
+// ADD DEPARTMENTS, ROLES, EMPLOYEES
+// =====================================================================
 // Add Employee
 function addEmployee() {
+  mysqlConnection.query(
+    `SELECT employee_info.first_name, employee_info.last_name, roles.title
+    FROM employee_info
+    INNER JOIN roles
+    ON employee_info.tole_id = roles.id`
+  ),
+    (err, resRole) => {
+      if (err) throw err;
+      const employeeRole = resRole.map((roles) => roles.title);
+      console.log(employeeRole);
+    };
+
+  mysqlConnection.query(
+    `SELECT employee_info.first_name, employee_info.last_name,
+  FROM employee_info
+  INNER JOIN employee_info manager
+  ON employee_info.id = manager.manager_id`
+  ),
+    (err, resManager) => {
+      if (err) throw err;
+      const managerId = resManager.filter(
+        (manager) => manager.manager_id != NULL
+      );
+      console.log(managerId);
+    };
   // prompt for user input: information on new employee
-  inquirer.prompt([
-    {
-      name: "firstName",
-      type: "input",
-      message: "What is the employee's first name?",
-    },
-    {
-      name: "lastName",
-      type: "input",
-      message: "What is the employee's last name?",
-    },
-    {
-      name: "role",
-      type: "list",
-      message: "What is the employee's role?",
-      // choices: how do I get these from the database?
-      // this will need to be converted to a role id?
-    },
-    {
-      name: "manager",
-      type: "list",
-      message: "Who is the employee's manager?",
-      // choices: how do I get these from the database?
-      // this answer will need to be converted to a manager id?
-    },
-  ]);
+  inquirer
+    .prompt([
+      {
+        name: "firstName",
+        type: "input",
+        message: "What is the employee's first name?",
+        validate: function (answer) {
+          if (answer.length < 1) {
+            return console.log("Please enter a valid name");
+          }
+          return true;
+        },
+      },
+      {
+        name: "lastName",
+        type: "input",
+        message: "What is the employee's last name?",
+        validate: function (answer) {
+          if (answer.length < 1) {
+            return console.log("Please enter a valide name");
+          }
+          return true;
+        },
+      },
+      {
+        name: "role",
+        type: "rawlist",
+        message: "What is the employee's role?",
+        choices: managerId,
+        // response.map((roles) => {
+        //           return { name: roles.id + " " + roles.title, value: roles.id };
+        //         }),
+      },
+      {
+        name: "manager",
+        type: "rawlist",
+        message: "Who is the employee's manager?",
+        choices: employeeRole,
+        // response.filter((manager) => {
+        //           return {
+        //             name:
+        //               employee_info.first_name +
+        //               " " +
+        //               employee_info.last_name,
+        //             value: employee_info.manager_id,
+      },
+      // }),
+      // },
+    ])
+    .then(function (answer) {
+      mysqlConnection.query(
+        "INSERT INTO employee_info SET ?",
+        {
+          first_name: answer.firstName,
+          last_name: answer.lastName,
+          role_id: answer.role,
+          manager_id: answer.manager,
+        },
+        function (err) {
+          if (err) throw err;
+          console.log(
+            `\n${answer.firstName} + " " + ${answer.lastName} has been added to the database...\n`
+          );
+        }
+      );
+      start();
+    });
 }
 
-// Add departments, roles, employees
+function addDepartment() {}
 // View departments, roles, employees
 // Update employee roles
-// -- View All Employees by Manager OPTIONAL
+//
 // -- Remove Employee OPTIONAL
 // -- Update Employee Role OPTIONAL
 // -- Update Employee Managers OPTIONAL
 // -- Delete departments, roles and employees
-// -- View total utilized budget
+function removeEmployee() {
+  mysqlConnection.query(`SELECT id, first_name, last_name FROM employee`),
+    (err, response) => {
+      if (err) throw err;
+      inquirer
+        .prompt([
+          {
+            name: "deleteEmployee",
+            type: "list",
+            message: "Which employee would you like to remove?",
+            choices: response.map((employee_info) => {
+              return {
+                name:
+                  employee_info.id +
+                  " " +
+                  employee_info.first_name +
+                  " " +
+                  employee_info.last_name,
+                value: employee_info.id,
+              };
+            }),
+          },
+        ])
+        .then((answer) => {
+          console.log(answer);
+          mysqlConnection.query(
+            "DELETE FROM employee WHERE ?",
+            { id: answer.deleteEmployee },
+            (err, res) => {
+              if (err) throw err;
+              console.log(
+                `\nThe following employee has been deleted from the database:\n`
+              );
+              console.log(res);
+            }
+          );
+          start();
+        });
+    };
+}
+// // -- View total utilized budget
 
 // Quit
 function quit() {
   mysqlConnection.end();
+  console.log(
+    "Thanks for using this Employee Management System. See you again soon..."
+      .bold.cyan
+  );
 }
 
-// asciiart-logo displays to start
+// // asciiart-logo displays to start
 function title() {
   console.log(
     logo({
