@@ -212,7 +212,7 @@ function addEmployee() {
                         function (err) {
                           if (err) throw err;
                           console.log(
-                            `\n${answer.firstName} + " " + ${answer.lastName} has been added...`
+                            `\nA new Employee has been successfully added to the database...`
                               .yellow
                           );
                         }
@@ -233,7 +233,7 @@ function addDepartment() {
       {
         name: "department",
         type: "input",
-        message: "Which DEPARTMENT would you like to add?",
+        message: "Which department would you like to add?",
       },
     ])
     .then((answer) => {
@@ -245,7 +245,7 @@ function addDepartment() {
           if (
             res.some((department) => department.name === `${answer.department}`)
           ) {
-            console.log("\nThis Department already exists\n".cyan);
+            console.log("\nThis Department already exists\n".yellow);
             start();
           } else {
             // add new department to database in department table
@@ -258,7 +258,7 @@ function addDepartment() {
                 if (err) throw err;
                 console.log(
                   `\n${answer.department} has been added to the database...\n`
-                    .cyan
+                    .yellow
                 );
                 start();
               }
@@ -277,6 +277,13 @@ function addRole() {
         type: "input",
         message: "Which new role would you like to enter?",
       },
+      {
+        name: "salary",
+        type: "input",
+        message: "What is the salary of this role?",
+        // regex to check that the salary is a number
+        validate: (val) => /^\d+$/.test(val),
+      },
     ])
     .then((answer) => {
       // mysqlConnection.query(`SELECT roles.title FROM roles`, (err, res) => {
@@ -285,21 +292,15 @@ function addRole() {
       //   console.log("\nThis role already exists\n");
       //   start();
       // } else {
-      mysqlConnection.query(`SELECT department.name FROM department`),
+      mysqlConnection.query(
+        `SELECT department.name FROM department`,
         (err, res) => {
           if (err) throw err;
           inquirer
             .prompt([
               {
-                name: "salary",
-                type: "input",
-                message: "What is the salary of this role?",
-                // regex to check that the salary is a number
-                validate: (val) => /^\d+$/.test(val),
-              },
-              {
                 name: "department",
-                type: "input",
+                type: "rawlist",
                 message: "Which Department does this role belong to?",
                 choices() {
                   return res.map((department) => department.name);
@@ -307,19 +308,28 @@ function addRole() {
               },
             ])
             .then((response) => {
+              // mysqlConnection.query(
+              //   `SELECT id FROM department WHERE department.name = "${response.department}"`,
+              //   (err, res) => {
+              //     if (err) throw err;
               mysqlConnection.query(
-                `SELECT id FROM department WHERE department.name = "${response.department}"`,
-                (err, res) => {
+                `INSERT INTO roles SET ?`,
+                {
+                  title: res.newRole,
+                  salary: res.salary,
+                  department_id: res.department,
+                },
+                function (err) {
                   if (err) throw err;
-                  mysqlConnection.query(`INSERT INTO role SET ?`, {
-                    title: [response.newRole],
-                    salary: [reponse.salary],
-                    department_id: [response.department],
-                  });
+                  console.log(
+                    `\nA new Role has been added to the database...\n`.yellow
+                  );
+                  start();
                 }
               );
             });
-        };
+        }
+      );
       // }
       // });
     });
@@ -380,7 +390,7 @@ function updateEmployeeRole() {
                     (err, res) => {
                       if (err) throw err;
                       console.log(
-                        `Employee role has been successfully updated`.cyan
+                        `Employee role has been successfully updated`.yellow
                       );
                     }
                   );
