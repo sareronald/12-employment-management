@@ -11,7 +11,7 @@ const mysqlConnection = mysql.createConnection({
   port: "root",
   port: 3306,
   user: "root",
-  password: "",
+  password: "tereala1982",
   database: "employee_trackerDB",
 });
 
@@ -188,7 +188,7 @@ function addEmployee() {
             .then((answer) => {
               // get all existing employees from database so manager selection can be filled
               mysqlConnection.query(
-                `SELECT employee_info.first_name, employee_info.last_name, employee_info.manager_id`,
+                `SELECT employee_info.first_name, employee_info.last_name, employee_info.manager_id FROM employee_info`,
                 (err, resManager) => {
                   if (err) throw err;
                   inquirer
@@ -198,15 +198,16 @@ function addEmployee() {
                         type: "rawlist",
                         message: "Who is the employee's manager?",
                         choices: resManager.filter((manager) => {
-                          if (manager.manager_id != NULL) {
+                          console.log(manager);
+                          if (manager.manager_id != null) {
                             return {
                               name:
-                                employee_info.id +
+                                manager.id +
                                 " " +
-                                employee_info.first_name +
+                                manager.first_name +
                                 " " +
-                                employee_info.last_name,
-                              value: employee_info.manager.id,
+                                manager.last_name,
+                              value: manager.id,
                             };
                           }
                         }),
