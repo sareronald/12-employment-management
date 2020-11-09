@@ -1,72 +1,98 @@
 # 12-employment-management
+
 Unit 12 MySQL Homework: Employee Tracker
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This Employee Tracker is a Content Management System (CMS) that allows non-developers to view and interact with information stored in databases. The app is designed to allow a person to manage a company's employees using Node, Inquirer and MySQL.
 
-## Project Objective
+## Table of Contents
+
+- [Objective](#Objective)
+- [UserStory](#UserStory)
+- [Installation](#Installation)
+- [Usage](#Usage)
+- [Files](#Files)
+- [Tools](#Tools)
+- [Screenshots](#Screenshots)
+- [License](#License)
+- [Link](#Link)
+- [Authors](#Authors)
+
+## Objective
 
 To create a functional application that allows the user to:
+
 - Add departments, roles and employees
 - View departments, roles and employees
 - Update employee roles
 
-## User Story
+## UserStory
 
-AS A business owner, 
+AS A business owner,
 I WANT to be able to view and manage the departments, roles and employees in my company
 SO THAT I can organise and plan my business
 
-## Acceptance Criteria
+## Installation
 
-* Application should allow users to create and save notes.
-* Application should allow users to view previously saved notes.
-* Application should allow users to delete previously saved notes.
+- Clone this GitHub repository
 
-## Contents
+```
+git clone git@github.com:sareronald/12-employment-management.git
+```
 
-This responsive application consists of the following files:
+- Install all dependent npm packages
 
-### Files included
+```
+npm install --save
+```
 
-| File              | Relative Path           |
-| ----------------- | ----------------------- |
+## Usage
+
+- Run `npm start` to start the application
+-
+
+## Files
+
+This CMS application consists of the following files: <hr>
+
+| File                | Relative Path          |
+| ------------------- | ---------------------- |
 | employee_schema.sql | db/employee_schema.sql |
-| seed.sql| db/seed.sql |
-| employee_tracker.js | employee_tracker.js |
-| package.json | package.json |
-| package-lock.json | package-lock.json |
+| seed.sql            | db/seed.sql            |
+| employee_tracker.js | employee_tracker.js    |
+| package.json        | package.json           |
+| package-lock.json   | package-lock.json      |
 
 ## Tools
 
 - [Visual Studio Code](https://code.visualstudio.com/) - The editor of choice
 - [GitHub](https://github.com/)
-- [MySQL](https://www.npmjs.com/package/mysql) 
-- [InquirerJs](https://www.npmjs.com/package/inquirer/v/0.2.3) 
+- [MySQL](https://www.npmjs.com/package/mysql)
+- [InquirerJs](https://www.npmjs.com/package/inquirer/v/0.2.3)
 - [console.table](https://www.npmjs.com/package/console.table)
 - [asciiart-logo](https://www.npmjs.com/package/asciiart-logo)
 - [colors](https://www.npmjs.com/package/colors)
 
+## Screenshots
 
-## Initial interface
+#### Screenshot of application
 
-### Screenshots
-
-#### Walkthrough video of VS Code and localhost
-![notetaker-walkthroughvideo](https://user-images.githubusercontent.com/67722377/97822289-8187bd80-1d09-11eb-8b82-992f35a75974.gif)
-
-#### Walkthrough video of the app hosted on Heroku
-![notetaker-walkthrough-online](https://user-images.githubusercontent.com/67722377/97864548-def92a00-1d5c-11eb-980e-08081a0d5bef.gif)
+#### Walkthrough video of the application in action
 
 ## Licence
-* [Apache License 2.0](http://www.apache.org/licenses/)
 
-## Link to the App
+- [Apache License 2.0](http://www.apache.org/licenses/)
 
-Please visit the <a href="https://guarded-brushlands-08736.herokuapp.com/">Note Taker site</a> hosted on Heroku.<hr>
+## Link
+
+### Link to the App
+
+Please visit my GitHub page for a copy of the code for <a href="https://github.com/sareronald/12-employment-management.git">this app.</a><hr>
+A video of the app in use can also be found <a href=""> here</a> on Google Docs.<hr>
 
 ## Authors
 
 - **SARAH RONALD** -
   Contact information:
   sareronald@hotmail.com
-
