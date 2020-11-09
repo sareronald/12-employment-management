@@ -11,7 +11,7 @@ const mysqlConnection = mysql.createConnection({
   port: "root",
   port: 3306,
   user: "root",
-  password: "",
+  password: "tereala1982",
   database: "employee_trackerDB",
 });
 
@@ -35,13 +35,11 @@ function start() {
         choices: [
           "View All Employees",
           "View All Employees by Department",
-          "View All Employees by Manager",
           "Add Employee",
           "Add Department",
           "Add Role",
           "Remove Employee",
           "Update Employee Role",
-          "Update Employee Manager",
           "Quit",
         ],
       },
@@ -54,10 +52,6 @@ function start() {
 
         case "View All Employees by Department":
           viewAllEmployeesByDept();
-          break;
-
-        case "View All Employees by Manager":
-          viewAllEmployeesByManager();
           break;
 
         case "Add Employee":
@@ -78,10 +72,6 @@ function start() {
 
         case "Update Employee Role":
           updateEmployeeRole();
-          break;
-
-        case "Update Employee Manager":
-          updateManager();
           break;
 
         case "Quit":
@@ -285,53 +275,53 @@ function addRole() {
       {
         name: "newRole",
         type: "input",
-        message: "Which NEW ROLE would you like to enter?",
+        message: "Which new role would you like to enter?",
       },
     ])
     .then((answer) => {
-      mysqlConnection.query(`SELECT roles.title FROM roles`, (err, res) => {
-        if (err) throw err;
-        if (res.some((roles) => roles.title === [answer.newRole])) {
-          console.log("\nThis role already exists\n");
-          start();
-        } else {
-          mysqlConnection.query(`SELECT department.name FROM department`),
-            (err, res) => {
-              if (err) throw err;
-              inquirer
-                .prompt([
-                  {
-                    name: "salary",
-                    type: "input",
-                    message: "What is the salary of this role?",
-                    // regex to check that the salary is a number
-                    validate: (val) => /^\d+$/.test(val),
-                  },
-                  {
-                    name: "department",
-                    type: "input",
-                    message: "Which Department does this role belong to?",
-                    choices() {
-                      return res.map((department) => department.name);
-                    },
-                  },
-                ])
-                .then((response) => {
-                  mysqlConnection.query(
-                    `SELECT id FROM department WHERE department.name = "${response.department}"`,
-                    (err, res) => {
-                      if (err) throw err;
-                      mysqlConnection.query(`INSERT INTO role SET ?`, {
-                        title: [response.newRole],
-                        salary: [reponse.salary],
-                        department_id: [response.department],
-                      });
-                    }
-                  );
-                });
-            };
-        }
-      });
+      // mysqlConnection.query(`SELECT roles.title FROM roles`, (err, res) => {
+      //   if (err) throw err;
+      // if (res.some((roles) => roles.title === [answer.newRole])) {
+      //   console.log("\nThis role already exists\n");
+      //   start();
+      // } else {
+      mysqlConnection.query(`SELECT department.name FROM department`),
+        (err, res) => {
+          if (err) throw err;
+          inquirer
+            .prompt([
+              {
+                name: "salary",
+                type: "input",
+                message: "What is the salary of this role?",
+                // regex to check that the salary is a number
+                validate: (val) => /^\d+$/.test(val),
+              },
+              {
+                name: "department",
+                type: "input",
+                message: "Which Department does this role belong to?",
+                choices() {
+                  return res.map((department) => department.name);
+                },
+              },
+            ])
+            .then((response) => {
+              mysqlConnection.query(
+                `SELECT id FROM department WHERE department.name = "${response.department}"`,
+                (err, res) => {
+                  if (err) throw err;
+                  mysqlConnection.query(`INSERT INTO role SET ?`, {
+                    title: [response.newRole],
+                    salary: [reponse.salary],
+                    department_id: [response.department],
+                  });
+                }
+              );
+            });
+        };
+      // }
+      // });
     });
 }
 

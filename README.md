@@ -50,7 +50,7 @@ npm install --save
 ## Usage
 
 - Run `npm start` to start the application
--
+- Then choose the relevant options from the menu
 
 ## Files
 
@@ -77,8 +77,7 @@ This CMS application consists of the following files: <hr>
 ## Screenshots
 
 #### Screenshot of application
-
-#### Walkthrough video of the application in action
+<img width="1680" alt="employee-tracker-screenshot" src="https://user-images.githubusercontent.com/67722377/98541683-ec299200-22e3-11eb-85ff-5ee953415ab5.png">
 
 ## Licence
 
@@ -87,7 +86,7 @@ This CMS application consists of the following files: <hr>
 ## Link to the App
 
 Please visit my GitHub page for a copy of the code for <a href="https://github.com/sareronald/12-employment-management.git">this app.</a><hr>
-A video of the app in use can also be found <a href=""> here</a> on Google Docs.<hr>
+A video of the app in use can also be found <a href="https://drive.google.com/file/d/18oAVtjBrS8e-enXHjsXaUKf_G5ersleD/view?usp=sharing"> here</a> on Google Docs.<hr>
 
 ## Authors
 
