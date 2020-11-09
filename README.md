@@ -8,18 +8,18 @@ This Employee Tracker is a Content Management System (CMS) that allows non-devel
 
 ## Table of Contents
 
-- [Objective](#Objective)
-- [UserStory](#UserStory)
+- [Project Objective](#Project-Objective)
+- [User Story](#User-Story)
 - [Installation](#Installation)
 - [Usage](#Usage)
 - [Files](#Files)
 - [Tools](#Tools)
 - [Screenshots](#Screenshots)
 - [License](#License)
-- [Link](#Link)
+- [Link to the App](#Link-to-the-App)
 - [Authors](#Authors)
 
-## Objective
+## Project Objective
 
 To create a functional application that allows the user to:
 
@@ -27,7 +27,7 @@ To create a functional application that allows the user to:
 - View departments, roles and employees
 - Update employee roles
 
-## UserStory
+## User Story
 
 AS A business owner,
 I WANT to be able to view and manage the departments, roles and employees in my company
@@ -84,9 +84,7 @@ This CMS application consists of the following files: <hr>
 
 - [Apache License 2.0](http://www.apache.org/licenses/)
 
-## Link
-
-### Link to the App
+## Link to the App
 
 Please visit my GitHub page for a copy of the code for <a href="https://github.com/sareronald/12-employment-management.git">this app.</a><hr>
 A video of the app in use can also be found <a href=""> here</a> on Google Docs.<hr>
