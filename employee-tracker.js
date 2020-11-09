@@ -147,31 +147,6 @@ function viewAllEmployeesByDept() {
 // =====================================================================
 // Add Employee
 function addEmployee() {
-  mysqlConnection.query(
-    `SELECT employee_info.first_name, employee_info.last_name, roles.title
-    FROM employee_info
-    INNER JOIN roles
-    ON employee_info.role_id = roles.id`
-  ),
-    (err, resRole) => {
-      if (err) throw err;
-      const employeeRole = resRole.map((roles) => roles.title);
-      console.log(employeeRole);
-    };
-
-  mysqlConnection.query(
-    `SELECT employee_info.first_name, employee_info.last_name,
-  FROM employee_info
-  INNER JOIN employee_info
-  ON employee_info.id = employee_info.manager_id`
-  ),
-    (err, resManager) => {
-      if (err) throw err;
-      const managerId = resManager.filter(
-        (manager) => manager.manager_id != NULL
-      );
-      console.log(managerId);
-    };
   // prompt for user input: information on new employee
   inquirer
     .prompt([
@@ -179,66 +154,89 @@ function addEmployee() {
         name: "firstName",
         type: "input",
         message: "What is the employee's first name?",
-        validate: function (answer) {
-          if (answer.length < 1) {
-            return console.log("Please enter a valid name");
-          }
-          return true;
-        },
+        // response MUST contain letters
+        validate: (val) => /^[A-Za-z\s]+$/.test(val),
       },
       {
         name: "lastName",
         type: "input",
         message: "What is the employee's last name?",
-        validate: function (answer) {
-          if (answer.length < 1) {
-            return console.log("Please enter a valid name");
-          }
-          return true;
-        },
+        // response MUST contain letters
+        validate: (val) => /^[A-Za-z\s]+$/.test(val),
       },
-      {
-        name: "role",
-        type: "rawlist",
-        message: "What is the employee's role?",
-        choices: managerId,
-        // response.map((roles) => {
-        //           return { name: roles.id + " " + roles.title, value: roles.id };
-        //         }),
-      },
-      {
-        name: "manager",
-        type: "rawlist",
-        message: "Who is the employee's manager?",
-        choices: employeeRole,
-        // response.filter((manager) => {
-        //           return {
-        //             name:
-        //               employee_info.first_name +
-        //               " " +
-        //               employee_info.last_name,
-        //             value: employee_info.manager_id,
-      },
-      // }),
-      // },
     ])
-    .then(function (answer) {
+    .then((answer) => {
+      // query all existing roles from the database to fill the role choices
       mysqlConnection.query(
-        "INSERT INTO employee_info SET ?",
-        {
-          first_name: answer.firstName,
-          last_name: answer.lastName,
-          role_id: answer.role,
-          manager_id: answer.manager,
-        },
-        function (err) {
+        `SELECT roles.id, roles.title FROM roles`,
+        (err, responseRole) => {
           if (err) throw err;
-          console.log(
-            `\n${answer.firstName} + " " + ${answer.lastName} has been added to the database...\n`
-          );
+          inquirer
+            .prompt([
+              {
+                name: "employeeRole",
+                type: "rawlist",
+                message: "What is the employee's role?",
+                choices: responseRole.map((roles) => {
+                  return {
+                    name: roles.title,
+                    value: roles.id,
+                  };
+                }),
+              },
+            ])
+            .then((answer) => {
+              // get all existing employees from database so manager selection can be filled
+              mysqlConnection.query(
+                `SELECT employee_info.first_name, employee_info.last_name, employee_info.manager_id`,
+                (err, resManager) => {
+                  if (err) throw err;
+                  inquirer
+                    .prompt([
+                      {
+                        name: "manager",
+                        type: "rawlist",
+                        message: "Who is the employee's manager?",
+                        choices: resManager.filter((manager) => {
+                          if (manager.manager_id != NULL) {
+                            return {
+                              name:
+                                employee_info.id +
+                                " " +
+                                employee_info.first_name +
+                                " " +
+                                employee_info.last_name,
+                              value: employee_info.manager.id,
+                            };
+                          }
+                        }),
+                      },
+                    ])
+                    .then((answer) => {
+                      // add new employee to database
+                      mysqlConnection.query(
+                        `INSERT INTO employee_info SET ?`,
+                        {
+                          first_name: answer.firstName,
+                          last_name: answer.lastName,
+                          role_id: answer.employeeRole,
+                          manager_id: answer.manager,
+                        },
+                        function (err) {
+                          if (err) throw err;
+                          console.log(
+                            `\n${answer.firstName} + " " + ${answer.lastName} has been added...`
+                              .yellow
+                          );
+                        }
+                      );
+                      start();
+                    });
+                }
+              );
+            });
         }
       );
-      start();
     });
 }
 
@@ -293,7 +291,7 @@ function addRole() {
         message: "Which NEW ROLE would you like to enter?",
       },
     ])
-    .then(function (answer) {
+    .then((answer) => {
       mysqlConnection.query(`SELECT roles.title FROM roles`, (err, res) => {
         if (err) throw err;
         if (res.some((roles) => roles.title === [answer.newRole])) {
@@ -340,7 +338,8 @@ function addRole() {
     });
 }
 
-// Update employee roles
+// UPDATE EMPLOYEE ROLES
+// =====================================================================
 function updateEmployeeRole() {
   // get all existing employees from database
   mysqlConnection.query(
@@ -396,9 +395,9 @@ function updateEmployeeRole() {
                       console.log(
                         `Employee role has been successfully updated`.cyan
                       );
-                      start();
                     }
                   );
+                  start();
                 });
             }
           );
@@ -407,9 +406,8 @@ function updateEmployeeRole() {
   );
 }
 
-// -- Update Employee Role OPTIONAL
-// -- Update Employee Managers OPTIONAL
-// -- Delete departments, roles and employees
+// REMOVE EMPLOYEES
+// =====================================================================
 function removeEmployee() {
   mysqlConnection.query(`SELECT id, first_name, last_name FROM employee`),
     (err, response) => {
@@ -436,7 +434,7 @@ function removeEmployee() {
         .then((answer) => {
           console.log(answer);
           mysqlConnection.query(
-            "DELETE FROM employee WHERE ?",
+            "DELETE FROM employee_info WHERE ?",
             { id: answer.deleteEmployee },
             (err, res) => {
               if (err) throw err;
@@ -450,9 +448,9 @@ function removeEmployee() {
         });
     };
 }
-// // -- View total utilized budget
 
-// Quit
+// QUIT
+// =====================================================================
 function quit() {
   mysqlConnection.end();
   console.log(
@@ -461,6 +459,8 @@ function quit() {
   );
 }
 
+// LOGO to initiate CMS
+// =====================================================================
 // // asciiart-logo displays to start
 function title() {
   console.log(
@@ -479,3 +479,10 @@ function title() {
       .render()
   );
 }
+
+// OTHER
+// =====================================================================
+// -- View total utilized budget
+// -- Update Employee Role OPTIONAL
+// -- Update Employee Managers OPTIONAL
+// -- Delete departments, roles and employees
