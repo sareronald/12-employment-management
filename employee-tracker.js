@@ -38,6 +38,7 @@ function start() {
           "View All Employees by Manager",
           "Add Employee",
           "Add Department",
+          "Add Role",
           "Remove Employee",
           "Update Employee Role",
           "Update Employee Manager",
@@ -65,6 +66,10 @@ function start() {
 
         case "Add Department":
           addDepartment();
+          break;
+
+        case "Add Role":
+          addRole();
           break;
 
         case "Remove Employee":
@@ -97,7 +102,7 @@ function viewAllEmployees() {
 
 // View All Employees by Department
 function viewAllEmployeesByDept() {
-  console.log(`\nSelecting all Employees by Department...\n`);
+  console.log(`\nSelecting all Employees by Department...\n`.cyan);
   mysqlConnection.query(
     "SELECT department.name FROM department",
     (err, response) => {
@@ -125,11 +130,12 @@ function viewAllEmployeesByDept() {
               if (err) throw err;
               console.log(
                 `\n The employees in the ${answer.deptChoice} Department are: \n`
+                  .cyan
               );
               console.table(res);
+              start();
             }
           );
-          start();
         });
     }
   );
@@ -145,7 +151,7 @@ function addEmployee() {
     `SELECT employee_info.first_name, employee_info.last_name, roles.title
     FROM employee_info
     INNER JOIN roles
-    ON employee_info.tole_id = roles.id`
+    ON employee_info.role_id = roles.id`
   ),
     (err, resRole) => {
       if (err) throw err;
@@ -156,8 +162,8 @@ function addEmployee() {
   mysqlConnection.query(
     `SELECT employee_info.first_name, employee_info.last_name,
   FROM employee_info
-  INNER JOIN employee_info manager
-  ON employee_info.id = manager.manager_id`
+  INNER JOIN employee_info
+  ON employee_info.id = employee_info.manager_id`
   ),
     (err, resManager) => {
       if (err) throw err;
@@ -186,7 +192,7 @@ function addEmployee() {
         message: "What is the employee's last name?",
         validate: function (answer) {
           if (answer.length < 1) {
-            return console.log("Please enter a valide name");
+            return console.log("Please enter a valid name");
           }
           return true;
         },
@@ -236,11 +242,106 @@ function addEmployee() {
     });
 }
 
-function addDepartment() {}
-// View departments, roles, employees
+function addDepartment() {
+  inquirer
+    .prompt([
+      {
+        name: "department",
+        type: "input",
+        message: "Which DEPARTMENT would you like to add?",
+      },
+    ])
+    .then((answer) => {
+      mysqlConnection.query(
+        `SELECT department.name FROM department`,
+        (err, res) => {
+          if (err) throw err;
+          // if department already exists,
+          if (
+            res.some((department) => department.name === `${answer.department}`)
+          ) {
+            console.log("\nThis Department already exists\n".cyan);
+            start();
+          } else {
+            // add new department to database in department table
+            mysqlConnection.query(
+              `INSERT INTO department SET ?`,
+              {
+                name: [answer.department],
+              },
+              function (err) {
+                if (err) throw err;
+                console.log(
+                  `\n${answer.department} has been added to the database...\n`
+                    .cyan
+                );
+                start();
+              }
+            );
+          }
+        }
+      );
+    });
+}
+
+function addRole() {
+  inquirer
+    .prompt([
+      {
+        name: "newRole",
+        type: "input",
+        message: "Which NEW ROLE would you like to enter?",
+      },
+    ])
+    .then(function (answer) {
+      mysqlConnection.query(`SELECT roles.title FROM roles`, (err, res) => {
+        if (err) throw err;
+        if (res.some((roles) => roles.title === [answer.newRole])) {
+          console.log("\nThis role already exists\n");
+          start();
+        } else {
+          mysqlConnection.query(`SELECT department.name FROM department`),
+            (err, res) => {
+              if (err) throw err;
+              inquirer
+                .prompt([
+                  {
+                    name: "salary",
+                    type: "input",
+                    message: "What is the salary of this role?",
+                    // regex to check that the salary is a number
+                    validate: (val) => /^\d+$/.test(val),
+                  },
+                  {
+                    name: "department",
+                    type: "input",
+                    message: "Which Department does this role belong to?",
+                    choices() {
+                      return res.map((department) => department.name);
+                    },
+                  },
+                ])
+                .then((response) => {
+                  mysqlConnection.query(
+                    `SELECT id FROM department WHERE department.name = "${response.department}"`,
+                    (err, res) => {
+                      if (err) throw err;
+                      mysqlConnection.query(`INSERT INTO role SET ?`, {
+                        title: [response.newRole],
+                        salary: [reponse.salary],
+                        department_id: [response.department],
+                      });
+                    }
+                  );
+                });
+            };
+        }
+      });
+    });
+}
+
 // Update employee roles
-//
-// -- Remove Employee OPTIONAL
+
 // -- Update Employee Role OPTIONAL
 // -- Update Employee Managers OPTIONAL
 // -- Delete departments, roles and employees
