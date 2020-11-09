@@ -77,7 +77,7 @@ function start() {
           break;
 
         case "Update Employee Role":
-          updateEmployee();
+          updateEmployeeRole();
           break;
 
         case "Update Employee Manager":
@@ -341,6 +341,71 @@ function addRole() {
 }
 
 // Update employee roles
+function updateEmployeeRole() {
+  // get all existing employees from database
+  mysqlConnection.query(
+    "SELECT employee_info.id, employee_info.first_name, employee_info.last_name FROM employee_info",
+    (err, response) => {
+      if (err) throw err;
+      inquirer
+        .prompt([
+          {
+            name: "whichEmployee",
+            type: "rawlist",
+            message: "Which employee would you like to update?",
+            choices: response.map((employee_info) => {
+              return {
+                name:
+                  employee_info.id +
+                  " " +
+                  employee_info.first_name +
+                  " " +
+                  employee_info.last_name,
+                value: employee_info.id,
+              };
+            }),
+          },
+        ])
+        .then((answer) => {
+          // ask the user to select the role they wish to update the employee to
+          mysqlConnection.query(
+            "SELECT roles.id, roles.title FROM roles",
+            (err, res) => {
+              if (err) throw err;
+              inquirer
+                .prompt([
+                  {
+                    name: "updateRole",
+                    type: "rawlist",
+                    message: "Which role would you like to update them to?",
+                    choices() {
+                      return res.map((roles) => roles.title);
+                    },
+                  },
+                ])
+                .then((answer) => {
+                  //  update role to database
+                  mysqlConnection.query(
+                    `UPDATE employee_info SET ? WHERE ?`,
+                    [
+                      { role_id: answer.updateRole },
+                      { id: answer.whichEmployee },
+                    ],
+                    (err, res) => {
+                      if (err) throw err;
+                      console.log(
+                        `Employee role has been successfully updated`.cyan
+                      );
+                      start();
+                    }
+                  );
+                });
+            }
+          );
+        });
+    }
+  );
+}
 
 // -- Update Employee Role OPTIONAL
 // -- Update Employee Managers OPTIONAL
