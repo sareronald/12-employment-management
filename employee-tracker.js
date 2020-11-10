@@ -6,6 +6,7 @@ const mysql = require("mysql");
 const colors = require("colors");
 let tempEmployee = {};
 let tempRole = {};
+let tempUpdateEmployee = {};
 
 // create the connection information for the sql database
 const mysqlConnection = mysql.createConnection({
@@ -37,6 +38,7 @@ function start() {
         choices: [
           "View All Employees",
           "View All Employees by Department",
+          "View All Employees by Role",
           "Add Employee",
           "Add Department",
           "Add Role",
@@ -54,6 +56,10 @@ function start() {
 
         case "View All Employees by Department":
           viewAllEmployeesByDept();
+          break;
+
+        case "View All Employees by Role":
+          viewAllEmployeesByRole();
           break;
 
         case "Add Employee":
@@ -91,7 +97,8 @@ function viewAllEmployees() {
     INNER JOIN roles 
     ON employee_info.role_id = roles.id
     INNER JOIN department 
-    ON roles.department_id = department.id`,
+    ON roles.department_id = department.id
+    ORDER BY roles.id`,
     (err, res) => {
       if (err) throw err;
       console.table(res);
@@ -141,6 +148,21 @@ function viewAllEmployeesByDept() {
   );
 }
 
+// View All Employees by Role
+function viewAllEmployeesByRole() {
+  console.log(`\nSelecting all Employees and their roles...\n`.cyan);
+  mysqlConnection.query(
+    `SELECT employee_info.id, employee_info.first_name, employee_info.last_name, roles.title AS role 
+    FROM employee_info
+    INNER JOIN roles
+    ON employee_info.role_id = roles.id`,
+    (err, res) => {
+      if (err) throw err;
+      console.table(res);
+      start();
+    }
+  );
+}
 // -- View All Employees by Manager OPTIONAL
 
 // ADD DEPARTMENTS, ROLES, EMPLOYEES
@@ -191,6 +213,9 @@ function addEmployee() {
               // get all existing employees from database so manager selection can be filled
               mysqlConnection.query(
                 `SELECT employee_info.id, employee_info.first_name, employee_info.last_name, employee_info.manager_id FROM employee_info`,
+                // `SELECT employee_info.id, employee_info.first_name, employee_info.last_name, employee_info.manager_id, roles.id, roles.title AS role
+                // FROM employee_info
+                // INNER JOIN roles ON employee_info.role_id = roles.id`,
                 (err, resManager) => {
                   if (err) throw err;
                   inquirer
@@ -205,7 +230,8 @@ function addEmployee() {
                           })
                           .map((manager) => {
                             return {
-                              name: manager.last_name,
+                              name:
+                                manager.first_name + " " + manager.last_name,
                               value: manager.id,
                             };
                           }),
@@ -222,7 +248,7 @@ function addEmployee() {
                           role_id: tempEmployee.employeeRole,
                           manager_id: tempEmployee.manager,
                         },
-                        function (err) {
+                        (err) => {
                           if (err) throw err;
                           console.log(
                             `\nA new Employee has been successfully added to the database...`
@@ -267,7 +293,7 @@ function addDepartment() {
               {
                 name: [answer.department],
               },
-              function (err) {
+              (err) => {
                 if (err) throw err;
                 console.log(
                   `\n${answer.department} has been added to the database...\n`
@@ -338,7 +364,7 @@ function addRole() {
                   salary: tempRole.salary,
                   department_id: tempRole.department,
                 },
-                function (err) {
+                (err) => {
                   if (err) throw err;
                   console.log(
                     `\nA new Role has been added to the database...\n`.yellow
@@ -368,20 +394,21 @@ function updateEmployeeRole() {
             name: "whichEmployee",
             type: "rawlist",
             message: "Which employee would you like to update?",
-            choices: response.map((employee_info) => {
+            choices: response.map((employee) => {
               return {
                 name:
-                  employee_info.id +
+                  employee.id +
                   " " +
-                  employee_info.first_name +
+                  employee.first_name +
                   " " +
-                  employee_info.last_name,
-                value: employee_info.id,
+                  employee.last_name,
+                value: employee.id,
               };
             }),
           },
         ])
         .then((answer) => {
+          tempUpdateEmployee = { ...tempUpdateEmployee, ...answer };
           // ask the user to select the role they wish to update the employee to
           mysqlConnection.query(
             "SELECT roles.id, roles.title FROM roles",
@@ -399,21 +426,22 @@ function updateEmployeeRole() {
                   },
                 ])
                 .then((answer) => {
+                  tempUpdateEmployee = { ...tempUpdateEmployee, ...answer };
                   //  update role to database
                   mysqlConnection.query(
                     `UPDATE employee_info SET ? WHERE ?`,
                     [
-                      { role_id: answer.updateRole },
-                      { id: answer.whichEmployee },
+                      { role_id: answer.tempUpdateEmployee },
+                      { id: answer.tempUpdateEmployee },
                     ],
-                    (err, res) => {
+                    (err) => {
                       if (err) throw err;
                       console.log(
-                        `Employee role has been successfully updated`.yellow
+                        `Employee role has been successfully updated...`.yellow
                       );
+                      start();
                     }
                   );
-                  start();
                 });
             }
           );
@@ -425,24 +453,27 @@ function updateEmployeeRole() {
 // REMOVE EMPLOYEES
 // =====================================================================
 function removeEmployee() {
-  mysqlConnection.query(`SELECT id, first_name, last_name FROM employee`),
+  mysqlConnection.query(
+    `SELECT employee_info.id, employee_info.first_name, employee_info.last_name 
+    FROM employee_info`,
+    // ),
     (err, response) => {
       if (err) throw err;
       inquirer
         .prompt([
           {
             name: "deleteEmployee",
-            type: "list",
+            type: "rawlist",
             message: "Which employee would you like to remove?",
-            choices: response.map((employee_info) => {
+            choices: response.map((employee) => {
               return {
                 name:
-                  employee_info.id +
+                  employee.id +
                   " " +
-                  employee_info.first_name +
+                  employee.first_name +
                   " " +
-                  employee_info.last_name,
-                value: employee_info.id,
+                  employee.last_name,
+                value: employee.id,
               };
             }),
           },
@@ -455,14 +486,15 @@ function removeEmployee() {
             (err, res) => {
               if (err) throw err;
               console.log(
-                `\nThe following employee has been deleted from the database:\n`
+                `\nThe chosen employee has been deleted from the database...\n`
+                  .yellow
               );
-              console.log(res);
+              start();
             }
           );
-          start();
         });
-    };
+    }
+  );
 }
 
 // QUIT
