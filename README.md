@@ -86,7 +86,7 @@ This CMS application consists of the following files: <hr>
 ## Link to the App
 
 Please visit my GitHub page for a copy of the code for <a href="https://github.com/sareronald/12-employment-management.git">this app.</a><hr>
-A video of the app in use can also be found <a href="https://drive.google.com/file/d/18oAVtjBrS8e-enXHjsXaUKf_G5ersleD/view?usp=sharing"> here</a> on Google Docs.<hr>
+A video of the app in use can also be found <a href="https://drive.google.com/file/d/1NhGJ5ScD5jtZqNQFhH46mlIgTTxBLagJ/view?usp=sharing"> here</a> on Google Docs.<hr>
 
 ## Authors
 
