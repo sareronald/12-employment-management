@@ -82,14 +82,22 @@ function start() {
       }
     });
 }
-
+// employee_info.id, employee_info.first_name, employee_info.last_name, roles.title, roles.salary,
 // View All Employees
 function viewAllEmployees() {
-  mysqlConnection.query("SELECT * FROM employee_info", (err, res) => {
-    if (err) throw err;
-    console.table(res);
-    start();
-  });
+  mysqlConnection.query(
+    `SELECT employee_info.id, employee_info.first_name, employee_info.last_name, department.name AS dept_name, roles.title AS role, roles.salary
+    FROM employee_info
+    INNER JOIN roles 
+    ON employee_info.role_id = roles.id
+    INNER JOIN department 
+    ON roles.department_id = department.id`,
+    (err, res) => {
+      if (err) throw err;
+      console.table(res);
+      start();
+    }
+  );
 }
 
 // View All Employees by Department
@@ -323,7 +331,8 @@ function addRole() {
               //   (err, res) => {
               //     if (err) throw err;
               mysqlConnection.query(
-                `INSERT INTO roles SET ?`,
+                `INSERT INTO roles SET ? WHERE ?`,
+                // WHERE department.name = the chosen department id = answer.department
                 {
                   title: tempRole.newRole,
                   salary: tempRole.salary,
