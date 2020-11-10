@@ -4,6 +4,8 @@ const inquirer = require("inquirer");
 const cTable = require("console.table");
 const mysql = require("mysql");
 const colors = require("colors");
+let tempEmployee = {};
+let tempRole = {};
 
 // create the connection information for the sql database
 const mysqlConnection = mysql.createConnection({
@@ -156,6 +158,7 @@ function addEmployee() {
       },
     ])
     .then((answer) => {
+      tempEmployee = { ...tempEmployee, ...answer };
       // query all existing roles from the database to fill the role choices
       mysqlConnection.query(
         `SELECT roles.id, roles.title FROM roles`,
@@ -176,6 +179,7 @@ function addEmployee() {
               },
             ])
             .then((answer) => {
+              tempEmployee = { ...tempEmployee, ...answer };
               // get all existing employees from database so manager selection can be filled
               mysqlConnection.query(
                 `SELECT employee_info.id, employee_info.first_name, employee_info.last_name, employee_info.manager_id FROM employee_info`,
@@ -200,14 +204,15 @@ function addEmployee() {
                       },
                     ])
                     .then((answer) => {
+                      tempEmployee = { ...tempEmployee, ...answer };
                       // add new employee to database
                       mysqlConnection.query(
                         `INSERT INTO employee_info SET ?`,
                         {
-                          first_name: answer.firstName,
-                          last_name: answer.lastName,
-                          role_id: answer.employeeRole,
-                          manager_id: answer.manager,
+                          first_name: tempEmployee.firstName,
+                          last_name: tempEmployee.lastName,
+                          role_id: tempEmployee.employeeRole,
+                          manager_id: tempEmployee.manager,
                         },
                         function (err) {
                           if (err) throw err;
@@ -215,9 +220,9 @@ function addEmployee() {
                             `\nA new Employee has been successfully added to the database...`
                               .yellow
                           );
+                          start();
                         }
                       );
-                      start();
                     });
                 }
               );
@@ -286,6 +291,7 @@ function addRole() {
       },
     ])
     .then((answer) => {
+      tempRole = { ...tempRole, ...answer };
       // mysqlConnection.query(`SELECT roles.title FROM roles`, (err, res) => {
       //   if (err) throw err;
       // if (res.some((roles) => roles.title === [answer.newRole])) {
@@ -293,8 +299,8 @@ function addRole() {
       //   start();
       // } else {
       mysqlConnection.query(
-        `SELECT department.name FROM department`,
-        (err, res) => {
+        `SELECT department.id, department.name FROM department`,
+        (err, resdept) => {
           if (err) throw err;
           inquirer
             .prompt([
@@ -302,12 +308,16 @@ function addRole() {
                 name: "department",
                 type: "rawlist",
                 message: "Which Department does this role belong to?",
-                choices() {
-                  return res.map((department) => department.name);
-                },
+                choices: resdept.map((department) => {
+                  return {
+                    name: department.name,
+                    value: department.id,
+                  };
+                }),
               },
             ])
-            .then((response) => {
+            .then((answer) => {
+              tempRole = { ...tempRole, ...answer };
               // mysqlConnection.query(
               //   `SELECT id FROM department WHERE department.name = "${response.department}"`,
               //   (err, res) => {
@@ -315,9 +325,9 @@ function addRole() {
               mysqlConnection.query(
                 `INSERT INTO roles SET ?`,
                 {
-                  title: res.newRole,
-                  salary: res.salary,
-                  department_id: res.department,
+                  title: tempRole.newRole,
+                  salary: tempRole.salary,
+                  department_id: tempRole.department,
                 },
                 function (err) {
                   if (err) throw err;
