@@ -419,10 +419,14 @@ function updateEmployeeRole() {
                   {
                     name: "updateRole",
                     type: "rawlist",
-                    message: "Which role would you like to update them to?",
-                    choices() {
-                      return res.map((roles) => roles.title);
-                    },
+                    message:
+                      "Which new role would you like to assign this employee",
+                    choices: res.map((roles) => {
+                      return {
+                        name: roles.title,
+                        value: roles.id,
+                      };
+                    }),
                   },
                 ])
                 .then((answer) => {
