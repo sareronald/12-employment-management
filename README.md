@@ -1,6 +1,6 @@
 # 12-employment-management
 
-Unit 12 MySQL Homework: Employee Tracker
+MySQL: Employee Tracker
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
@@ -29,9 +29,9 @@ To create a functional application that allows the user to:
 
 ## User Story
 
-AS A business owner,
-I WANT to be able to view and manage the departments, roles and employees in my company
-SO THAT I can organise and plan my business
+As a business owner,
+I want to be able to view and manage the departments, roles and employees in my company
+so that I can organise and plan my business.
 
 ## Installation
 
@@ -77,6 +77,7 @@ This CMS application consists of the following files: <hr>
 ## Screenshots
 
 #### Screenshot of application
+
 <img width="1680" alt="employee-tracker-screenshot" src="https://user-images.githubusercontent.com/67722377/98541683-ec299200-22e3-11eb-85ff-5ee953415ab5.png">
 
 ## Licence
